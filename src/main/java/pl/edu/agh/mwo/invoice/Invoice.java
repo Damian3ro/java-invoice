@@ -27,7 +27,15 @@ public class Invoice {
     }
 
     public BigDecimal getTax() {
-        return BigDecimal.ZERO;
+        if(products.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal tax = new BigDecimal(0);
+        for(Product product : products.keySet()) {
+            tax = tax.add(product.getPrice().multiply(product.getTaxPercent()));
+        }
+        return tax;
     }
 
     public BigDecimal getTotal() {
@@ -37,7 +45,7 @@ public class Invoice {
 
         BigDecimal total = new BigDecimal(0);
         for(Product product : products.keySet()) {
-            total = total.add(product.getPriceWithTax());
+            total = total.add(product.getPriceWithTax().multiply(BigDecimal.valueOf(products.get(product))));
         }
         return total;
     }
