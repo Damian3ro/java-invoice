@@ -31,6 +31,14 @@ public class Invoice {
     }
 
     public BigDecimal getTotal() {
-        return BigDecimal.ZERO;
+        if(products.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal total = new BigDecimal(0);
+        for(Product product : products.keySet()) {
+            total = total.add(product.getPriceWithTax());
+        }
+        return total;
     }
 }
