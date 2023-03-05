@@ -1,6 +1,12 @@
 name: CI for Java Invoice
 on: [push]
 jobs:
+  example_matrix:
+    strategy:
+      matrix:
+        version: [ 8, 13, 15 ]
+        os: [ ubuntu-latest, windows-latest ]
+
   lint:
     name: Check code with checkstyle
     runs-on: ubuntu-latest
@@ -22,7 +28,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v2
         with:
-          java-version: '15'
+          java-version: ${{ matrix.version }}
           distribution: 'adopt'
       - name: Test
         run: mvn test
