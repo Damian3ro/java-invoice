@@ -1,7 +1,9 @@
 package pl.edu.agh.mwo.invoice;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -150,4 +152,32 @@ public class InvoiceTest {
         int number2 = new Invoice().getNumber();
         Assert.assertThat(number1, Matchers.lessThan(number2));
     }
+
+    @Test
+    public void testIfAllPositionsOnInvoicePrintAreCorrect () {
+        invoice.addProduct(new TaxFreeProduct("Papryka", new BigDecimal("10")), 5);
+        invoice.addProduct(new DairyProduct("Mleko", new BigDecimal("4")), 10);
+        invoice.addProduct(new OtherProduct("Buty", new BigDecimal("100")), 4);
+        Map<Product, Integer> products = invoice.getProducts();
+
+        for (Product product : products.keySet()) {
+            invoice.addInvoicePosition(product);
+            String invoicePositionCheck = product.getName() + ", quantity: " + products.get(product)
+                    + ", price: " + product.getPrice();
+            String position = invoice.getInvoicePositions().get(product);
+            Assert.assertEquals(invoicePositionCheck, position);
+        }
+    }
+
+    @Test
+    public void testIfPositionsNumberOnInvoicePrintIsCorrect () {
+        invoice.addProduct(new TaxFreeProduct("Papryka", new BigDecimal("10")), 5);
+        invoice.addProduct(new DairyProduct("Mleko", new BigDecimal("4")), 10);
+        invoice.addProduct(new OtherProduct("Buty", new BigDecimal("100")), 4);
+        for (Product product : invoice.getProducts().keySet()) {
+            invoice.addInvoicePosition(product);
+        }
+        Assert.assertEquals(3,invoice.getInvoicePositions().size());
+    }
+
 }

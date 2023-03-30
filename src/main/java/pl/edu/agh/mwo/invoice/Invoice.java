@@ -1,7 +1,9 @@
 package pl.edu.agh.mwo.invoice;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import pl.edu.agh.mwo.invoice.product.Product;
@@ -10,6 +12,7 @@ public class Invoice {
     private Map<Product, Integer> products = new HashMap<>();
     private static int nextNumber = 0;
     private final int number = ++nextNumber;
+    private Map<Product, String> invoicePositions = new HashMap<>();
 
     public void addProduct(Product product) {
         addProduct(product, 1);
@@ -46,5 +49,33 @@ public class Invoice {
 
     public int getNumber() {
         return number;
+    }
+
+    public Map<Product, Integer> getProducts() {
+        return products;
+    }
+
+    public void addInvoicePosition(Product product) {
+        String position = product.getName() + ", quantity: " + products.get(product) + ", price: "
+                + product.getPrice();
+        invoicePositions.put(product, position);
+    }
+
+    public Map<Product, String> getInvoicePositions() { return invoicePositions; }
+
+    public void printInvoice() {
+        for(Product product  : products.keySet()) {
+            addInvoicePosition(product);
+        }
+
+        System.out.println("Faktura nr " + getNumber() + "\n");
+
+        int i = 1;
+        for(Product product : invoicePositions.keySet()) {
+            System.out.println(i + ". " + invoicePositions.get(product));
+            i++;
+        }
+
+        System.out.println("\nLiczba pozycji: " + invoicePositions.size());
     }
 }
