@@ -61,21 +61,24 @@ public class Invoice {
         invoicePositions.put(product, position);
     }
 
-    public Map<Product, String> getInvoicePositions() { return invoicePositions; }
+    public Map<Product, String> getInvoicePositions() {
+        return invoicePositions;
+    }
 
     public void printInvoice() {
-        for(Product product  : products.keySet()) {
+        for (Product product  : products.keySet()) {
             addInvoicePosition(product);
         }
 
         System.out.println("Faktura nr " + getNumber() + "\n");
 
         int i = 1;
-        for(Product product : invoicePositions.keySet()) {
+        for (Product product : invoicePositions.keySet()) {
             System.out.println(i + ". " + invoicePositions.get(product));
             i++;
         }
 
         System.out.println("\nLiczba pozycji: " + invoicePositions.size());
     }
+
 }
