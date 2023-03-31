@@ -1,6 +1,8 @@
 package pl.edu.agh.mwo.invoice;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.hamcrest.MatcherAssert;
@@ -158,14 +160,17 @@ public class InvoiceTest {
         invoice.addProduct(new TaxFreeProduct("Papryka", new BigDecimal("10")), 5);
         invoice.addProduct(new DairyProduct("Mleko", new BigDecimal("4")), 10);
         invoice.addProduct(new OtherProduct("Buty", new BigDecimal("100")), 4);
-        Map<Product, Integer> products = invoice.getProducts();
+        List<String> invoicePositions = new ArrayList<>();
 
-        for (Product product : products.keySet()) {
+        for (Product product : invoice.getProducts().keySet()) {
             invoice.addInvoicePosition(product);
-            String invoicePositionCheck = product.getName() + ", quantity: " + products.get(product)
+            String invoicePositionCheck = product.getName()
+                    + ", quantity: " + invoice.getProducts().get(product)
                     + ", price: " + product.getPrice();
-            String position = invoice.getInvoicePositions().get(product);
-            Assert.assertEquals(invoicePositionCheck, position);
+            invoicePositions.add(invoicePositionCheck);
+        }
+        for (int i = 0; i < invoicePositions.size(); i++) {
+            Assert.assertEquals(invoicePositions.get(i), invoice.getInvoicePositions().get(i));
         }
     }
 
@@ -178,6 +183,54 @@ public class InvoiceTest {
             invoice.addInvoicePosition(product);
         }
         Assert.assertEquals(3,invoice.getInvoicePositions().size());
+    }
+
+    @Test
+    public void testIfPositionsNumberDoesntChangeAfterAddingTheSameProductMultipleTimes () {
+        invoice.addProduct(new TaxFreeProduct("Papryka", new BigDecimal("10")), 5);
+        invoice.addProduct(new DairyProduct("Mleko", new BigDecimal("4")), 10);
+        invoice.addProduct(new OtherProduct("Buty", new BigDecimal("100")), 4);
+        invoice.addProduct(new OtherProduct("Buty", new BigDecimal("100")), 16);
+        invoice.addProduct(new OtherProduct("Buty", new BigDecimal("100")), 16);
+        invoice.addProduct(new OtherProduct("Buty", new BigDecimal("100")), 16);
+        for (Product product : invoice.getProducts().keySet()) {
+            invoice.addInvoicePosition(product);
+        }
+        Assert.assertEquals(3,invoice.getInvoicePositions().size());
+    }
+
+    @Test
+    public void testIfProductQuantityOnInvoicePrintIsCorrectAfterAddingTheSameProductMultipleTimes () {
+        invoice.addProduct(new OtherProduct("Buty", new BigDecimal("100")), 4);
+        invoice.addProduct(new OtherProduct("Buty", new BigDecimal("100")), 16);
+        invoice.addProduct(new OtherProduct("Buty", new BigDecimal("100")), 16);
+        invoice.addProduct(new OtherProduct("Buty", new BigDecimal("100")), 16);
+        int quantity1 = 0;
+        for (Product product : invoice.getProducts().keySet()) {
+            quantity1 = quantity1 + invoice.getProducts().get(product);
+        }
+        Assert.assertEquals(52, quantity1);
+
+        invoice.addProduct(new DairyProduct("Mleko", new BigDecimal("4")), 10);
+        invoice.addProduct(new DairyProduct("Mleko", new BigDecimal("4")), 1500);
+        int quantity2 = 0;
+        for (Product product : invoice.getProducts().keySet()) {
+            if (product.getName().equals("Mleko")) {
+                quantity2 = quantity2 + invoice.getProducts().get(product);
+            }
+        }
+        Assert.assertEquals(1510, quantity2);
+
+        invoice.addProduct(new TaxFreeProduct("Papryka", new BigDecimal("10")), 5);
+        invoice.addProduct(new TaxFreeProduct("Papryka", new BigDecimal("10")), 5);
+        invoice.addProduct(new TaxFreeProduct("Papryka", new BigDecimal("10")), 5);
+        int quantity3 = 0;
+        for (Product product : invoice.getProducts().keySet()) {
+            if (product.getName().equals("Papryka")) {
+                quantity3 = quantity3 + invoice.getProducts().get(product);
+            }
+        }
+        Assert.assertEquals(15, quantity3);
     }
 
 }

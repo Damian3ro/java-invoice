@@ -12,7 +12,7 @@ public class Invoice {
     private Map<Product, Integer> products = new HashMap<>();
     private static int nextNumber = 0;
     private final int number = ++nextNumber;
-    private Map<Product, String> invoicePositions = new HashMap<>();
+    private List<String> invoicePositions = new ArrayList<>();
 
     public void addProduct(Product product) {
         addProduct(product, 1);
@@ -22,7 +22,26 @@ public class Invoice {
         if (product == null || quantity <= 0) {
             throw new IllegalArgumentException();
         }
-        products.put(product, quantity);
+
+        if (checkDuplicatedProducts(product)) {
+            for (Product productAdded : products.keySet()) {
+                if (productAdded.getName().equals(product.getName())) {
+                    quantity = quantity + products.get(productAdded);
+                    products.put(productAdded, quantity);
+                }
+            }
+        } else {
+            products.put(product, quantity);
+        }
+    }
+
+    public boolean checkDuplicatedProducts(Product product) {
+        for (Product productAdded : products.keySet()) {
+            if (productAdded.getName().equals(product.getName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public BigDecimal getNetTotal() {
@@ -58,10 +77,10 @@ public class Invoice {
     public void addInvoicePosition(Product product) {
         String position = product.getName() + ", quantity: " + products.get(product) + ", price: "
                 + product.getPrice();
-        invoicePositions.put(product, position);
+        invoicePositions.add(position);
     }
 
-    public Map<Product, String> getInvoicePositions() {
+    public List<String> getInvoicePositions() {
         return invoicePositions;
     }
 
@@ -72,10 +91,8 @@ public class Invoice {
 
         System.out.println("Faktura nr " + getNumber() + "\n");
 
-        int i = 1;
-        for (Product product : invoicePositions.keySet()) {
-            System.out.println(i + ". " + invoicePositions.get(product));
-            i++;
+        for (int i = 0; i < invoicePositions.size(); i++) {
+            System.out.println(i+1 + ". " + invoicePositions.get(i));
         }
 
         System.out.println("\nLiczba pozycji: " + invoicePositions.size());
