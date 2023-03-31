@@ -92,7 +92,7 @@ public class Invoice {
         System.out.println("Faktura nr " + getNumber() + "\n");
 
         for (int i = 0; i < invoicePositions.size(); i++) {
-            System.out.println(i+1 + ". " + invoicePositions.get(i));
+            System.out.println(i + 1 + ". " + invoicePositions.get(i));
         }
 
         System.out.println("\nLiczba pozycji: " + invoicePositions.size());
