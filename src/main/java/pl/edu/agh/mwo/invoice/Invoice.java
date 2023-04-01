@@ -37,7 +37,8 @@ public class Invoice {
 
     public boolean checkDuplicatedProducts(Product product) {
         for (Product productAdded : products.keySet()) {
-            if (productAdded.getName().equals(product.getName())) {
+            if (productAdded.getName().equals(product.getName())
+                    && productAdded.getPrice().equals(product.getPrice())) {
                 return true;
             }
         }
