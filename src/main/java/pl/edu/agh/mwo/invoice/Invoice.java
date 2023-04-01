@@ -3,57 +3,100 @@ package pl.edu.agh.mwo.invoice;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import pl.edu.agh.mwo.invoice.product.Product;
 
 public class Invoice {
-    //private Collection<Product> products;
     private Map<Product, Integer> products = new HashMap<>();
+    private static int nextNumber = 0;
+    private final int number = ++nextNumber;
+    private List<String> invoicePositions = new ArrayList<>();
 
     public void addProduct(Product product) {
-        if(product == null) {
-            throw new IllegalArgumentException("Product name cannot be null.");
-        }
-        products.put(product, 1);
+        addProduct(product, 1);
     }
 
     public void addProduct(Product product, Integer quantity) {
-        if(quantity == 0 || quantity == -1) {
-            throw new IllegalArgumentException("Quantity of product should equal at least 1.");
+        if (product == null || quantity <= 0) {
+            throw new IllegalArgumentException();
         }
 
-        products.put(product, quantity);
+        if (checkDuplicatedProducts(product)) {
+            for (Product productAdded : products.keySet()) {
+                if (productAdded.getName().equals(product.getName())) {
+                    quantity = quantity + products.get(productAdded);
+                    products.put(productAdded, quantity);
+                }
+            }
+        } else {
+            products.put(product, quantity);
+        }
+    }
+
+    public boolean checkDuplicatedProducts(Product product) {
+        for (Product productAdded : products.keySet()) {
+            if (productAdded.getName().equals(product.getName())
+                    && productAdded.getPrice().equals(product.getPrice())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public BigDecimal getNetTotal() {
-        BigDecimal netTotal = new BigDecimal(0);
-        for(Product product : products.keySet()) {
-            netTotal = netTotal.add(product.getPrice().multiply(BigDecimal.valueOf(products.get(product))));
+        BigDecimal totalNet = BigDecimal.ZERO;
+        for (Product product : products.keySet()) {
+            BigDecimal quantity = new BigDecimal(products.get(product));
+            totalNet = totalNet.add(product.getPrice().multiply(quantity));
         }
-        return netTotal;
+        return totalNet;
     }
 
-    public BigDecimal getTax() {
-        if(products.isEmpty()) {
-            return BigDecimal.ZERO;
-        }
-
-        BigDecimal tax = new BigDecimal(0);
-        for(Product product : products.keySet()) {
-            tax = tax.add(product.getPrice().multiply(product.getTaxPercent()));
-        }
-        return tax;
+    public BigDecimal getTaxTotal() {
+        return getGrossTotal().subtract(getNetTotal());
     }
 
-    public BigDecimal getTotal() {
-        if(products.isEmpty()) {
-            return BigDecimal.ZERO;
+    public BigDecimal getGrossTotal() {
+        BigDecimal totalGross = BigDecimal.ZERO;
+        for (Product product : products.keySet()) {
+            BigDecimal quantity = new BigDecimal(products.get(product));
+            totalGross = totalGross.add(product.getPriceWithTax().multiply(quantity));
+        }
+        return totalGross;
+    }
+
+    public int getNumber() {
+        return number;
+    }
+
+    public Map<Product, Integer> getProducts() {
+        return products;
+    }
+
+    public void addInvoicePosition(Product product) {
+        String position = product.getName() + ", quantity: " + products.get(product) + ", price: "
+                + product.getPrice();
+        invoicePositions.add(position);
+    }
+
+    public List<String> getInvoicePositions() {
+        return invoicePositions;
+    }
+
+    public void printInvoice() {
+        for (Product product  : products.keySet()) {
+            addInvoicePosition(product);
         }
 
-        BigDecimal total = new BigDecimal(0);
-        for(Product product : products.keySet()) {
-            total = total.add(product.getPriceWithTax().multiply(BigDecimal.valueOf(products.get(product))));
+        System.out.println("Faktura nr " + getNumber() + "\n");
+
+        for (int i = 0; i < invoicePositions.size(); i++) {
+            System.out.println(i + 1 + ". " + invoicePositions.get(i));
         }
-        return total;
+
+        System.out.println("\nLiczba pozycji: " + invoicePositions.size());
     }
+
 }
