@@ -14,7 +14,8 @@ public class FuelCanister extends Product {
     }
 
     public BigDecimal getExciseTaxValue() {
-        if (currentDate.getDayOfMonth() == dayOfMotherInLawDay && currentDate.getMonthValue() == monthOfmotherInLawDay) {
+        if (currentDate.getDayOfMonth() == dayOfMotherInLawDay
+                && currentDate.getMonthValue() == monthOfmotherInLawDay) {
             return BigDecimal.ZERO;
         }
         return exciseTaxValue;
@@ -30,7 +31,8 @@ public class FuelCanister extends Product {
 
     @Override
     public BigDecimal getTaxPercent() {
-        if (currentDate.getDayOfMonth() == dayOfMotherInLawDay && currentDate.getMonthValue() == monthOfmotherInLawDay) {
+        if (currentDate.getDayOfMonth() == dayOfMotherInLawDay
+                && currentDate.getMonthValue() == monthOfmotherInLawDay) {
             return BigDecimal.ZERO;
         } else {
             return super.getTaxPercent();
@@ -39,7 +41,8 @@ public class FuelCanister extends Product {
 
     @Override
     public BigDecimal getPriceWithTax() {
-        if (currentDate.getDayOfMonth() == dayOfMotherInLawDay && currentDate.getMonthValue() == monthOfmotherInLawDay) {
+        if (currentDate.getDayOfMonth() == dayOfMotherInLawDay
+                && currentDate.getMonthValue() == monthOfmotherInLawDay) {
             return super.getPrice();
         } else {
             return super.getPriceWithTax().add(exciseTaxValue);
