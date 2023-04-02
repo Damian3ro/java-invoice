@@ -13,6 +13,10 @@ import pl.edu.agh.mwo.invoice.product.*;
 
 public class InvoiceTest {
     private Invoice invoice;
+    private final int dayOfMonth = 1;
+    private final int month = 1;
+    private final int motherInLawDayOfMonth = 5;
+    private final int motherInLawMonth = 3;
 
     @Before
     public void createEmptyInvoiceForTheTest() {
@@ -68,7 +72,7 @@ public class InvoiceTest {
     }
 
     @Test
-    public void testInvoiceHasProperTaxValueForManyProduct() {
+    public void testInvoiceHasProperTaxValueForManyProductOnNormalDay() {
         // tax: 0
         invoice.addProduct(new TaxFreeProduct("Pampersy", new BigDecimal("200")));
         // tax: 8
@@ -77,13 +81,32 @@ public class InvoiceTest {
         invoice.addProduct(new OtherProduct("Piwko", new BigDecimal("10")));
         // tax: 10.16
         invoice.addProduct(new BottleOfWine("Wino", new BigDecimal("20")));
-        // tax: 0 - z okazji Dnia Tesciowej (ustawa)
-        invoice.addProduct(new FuelCanister("Benzyna", new BigDecimal("50")));
+        // tax: 17.06
+        FuelCanister fuelCanister = new FuelCanister("Benzyna", new BigDecimal("50"));
+        invoice.addProduct(fuelCanister);
+        fuelCanister.setCurrentDate(fuelCanister.getCurrentDate().getYear(), month, dayOfMonth);
+        Assert.assertThat(new BigDecimal("37.52"), Matchers.comparesEqualTo(invoice.getTaxTotal()));
+    }
+
+    @Test
+    public void testInvoiceHasProperTaxValueForManyProductOnMotherInLawDay() {
+        // tax: 0
+        invoice.addProduct(new TaxFreeProduct("Pampersy", new BigDecimal("200")));
+        // tax: 8
+        invoice.addProduct(new DairyProduct("Kefir", new BigDecimal("100")));
+        // tax: 2.30
+        invoice.addProduct(new OtherProduct("Piwko", new BigDecimal("10")));
+        // tax: 10.16
+        invoice.addProduct(new BottleOfWine("Wino", new BigDecimal("20")));
+        // tax: 0 - Mother-in-law Day
+        FuelCanister fuelCanister = new FuelCanister("Benzyna", new BigDecimal("50"));
+        invoice.addProduct(fuelCanister);
+        fuelCanister.setCurrentDate(fuelCanister.getCurrentDate().getYear(), motherInLawMonth, motherInLawDayOfMonth);
         Assert.assertThat(new BigDecimal("20.46"), Matchers.comparesEqualTo(invoice.getTaxTotal()));
     }
 
     @Test
-    public void testInvoiceHasProperTotalValueForManyProduct() {
+    public void testInvoiceHasProperTotalValueForManyProductOnNormalDay() {
         // price with tax: 200
         invoice.addProduct(new TaxFreeProduct("Maskotki", new BigDecimal("200")));
         // price with tax: 108
@@ -92,8 +115,27 @@ public class InvoiceTest {
         invoice.addProduct(new OtherProduct("Chipsy", new BigDecimal("10")));
         // price with tax: 30.16
         invoice.addProduct(new BottleOfWine("Wino", new BigDecimal("20")));
-        // price with tax: 50
-        invoice.addProduct(new FuelCanister("Benzyna", new BigDecimal("50")));
+        // price with tax: 67.06
+        FuelCanister fuelCanister = new FuelCanister("Benzyna", new BigDecimal("50"));
+        invoice.addProduct(fuelCanister);
+        fuelCanister.setCurrentDate(fuelCanister.getCurrentDate().getYear(), month, dayOfMonth);
+        Assert.assertThat(new BigDecimal("417.52"), Matchers.comparesEqualTo(invoice.getGrossTotal()));
+    }
+
+    @Test
+    public void testInvoiceHasProperTotalValueForManyProductOnMotherInLawDay() {
+        // price with tax: 200
+        invoice.addProduct(new TaxFreeProduct("Maskotki", new BigDecimal("200")));
+        // price with tax: 108
+        invoice.addProduct(new DairyProduct("Maslo", new BigDecimal("100")));
+        // price with tax: 12.30
+        invoice.addProduct(new OtherProduct("Chipsy", new BigDecimal("10")));
+        // price with tax: 30.16
+        invoice.addProduct(new BottleOfWine("Wino", new BigDecimal("20")));
+        // price with tax: 50 - Mother-in-law Day
+        FuelCanister fuelCanister = new FuelCanister("Benzyna", new BigDecimal("50"));
+        invoice.addProduct(fuelCanister);
+        fuelCanister.setCurrentDate(fuelCanister.getCurrentDate().getYear(), motherInLawMonth, motherInLawDayOfMonth);
         Assert.assertThat(new BigDecimal("400.46"), Matchers.comparesEqualTo(invoice.getGrossTotal()));
     }
 
@@ -113,7 +155,7 @@ public class InvoiceTest {
     }
 
     @Test
-    public void testInvoiceHasPropoerTotalWithQuantityMoreThanOne() {
+    public void testInvoiceHasPropoerTotalWithQuantityMoreThanOneOnNormalDay() {
         // 2x chleb - price with tax: 10
         invoice.addProduct(new TaxFreeProduct("Chleb", new BigDecimal("5")), 2);
         // 3x chedar - price with tax: 32.40
@@ -122,8 +164,27 @@ public class InvoiceTest {
         invoice.addProduct(new OtherProduct("Pinezka", new BigDecimal("0.01")), 1000);
         // 5x wino - price with tax: 150.80
         invoice.addProduct(new BottleOfWine("Wino", new BigDecimal("20")), 5);
-        // 10x wino - price with tax: 500
-        invoice.addProduct(new FuelCanister("Benzyna", new BigDecimal("50")), 10);
+        // 10x wino - price with tax: 670.60
+        FuelCanister fuelCanister = new FuelCanister("Benzyna", new BigDecimal("50"));
+        invoice.addProduct(fuelCanister, 10);
+        fuelCanister.setCurrentDate(fuelCanister.getCurrentDate().getYear(), month, dayOfMonth);
+        Assert.assertThat(new BigDecimal("876.10"), Matchers.comparesEqualTo(invoice.getGrossTotal()));
+    }
+
+    @Test
+    public void testInvoiceHasPropoerTotalWithQuantityMoreThanOneOnMotherInLawDay() {
+        // 2x chleb - price with tax: 10
+        invoice.addProduct(new TaxFreeProduct("Chleb", new BigDecimal("5")), 2);
+        // 3x chedar - price with tax: 32.40
+        invoice.addProduct(new DairyProduct("Chedar", new BigDecimal("10")), 3);
+        // 1000x pinezka - price with tax: 12.30
+        invoice.addProduct(new OtherProduct("Pinezka", new BigDecimal("0.01")), 1000);
+        // 5x wino - price with tax: 150.80
+        invoice.addProduct(new BottleOfWine("Wino", new BigDecimal("20")), 5);
+        // 10x wino - price with tax: 500 - Mother-in-law Day
+        FuelCanister fuelCanister = new FuelCanister("Benzyna", new BigDecimal("50"));
+        invoice.addProduct(fuelCanister, 10);
+        fuelCanister.setCurrentDate(fuelCanister.getCurrentDate().getYear(), motherInLawMonth, motherInLawDayOfMonth);
         Assert.assertThat(new BigDecimal("705.50"), Matchers.comparesEqualTo(invoice.getGrossTotal()));
     }
 

@@ -7,6 +7,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class ProductTest {
+    private final int dayOfMonth = 1;
+    private final int month = 1;
+    private final int motherInLawDayOfMonth = 5;
+    private final int motherInLawMonth = 3;
     @Test
     public void testProductNameIsCorrect() {
         Product product = new OtherProduct("buty", new BigDecimal("100.0"));
@@ -54,10 +58,13 @@ public class ProductTest {
     }
 
     @Test
-    public void testProductPriceAndAdditionalTaxValueForBottleOfWineProduct() {
+    public void testProductPriceAndTaxForBottleOfWineProduct() {
         BottleOfWine product = new BottleOfWine("Białe wino", new BigDecimal("80.0"));
         Assert.assertThat(new BigDecimal("80"), Matchers.comparesEqualTo(product.getPrice()));
-        Assert.assertThat(new BigDecimal("5.56"), Matchers.comparesEqualTo(product.getAdditionalTaxValue()));
+        // excise tax: 5.56
+        Assert.assertThat(new BigDecimal("5.56"), Matchers.comparesEqualTo(product.getExciseTaxValue()));
+        // tax: 0.23
+        Assert.assertThat(new BigDecimal("0.23"), Matchers.comparesEqualTo(product.getTaxPercent()));
     }
 
     @Test
@@ -68,16 +75,44 @@ public class ProductTest {
     }
 
     @Test
-    public void testProductPriceAndAdditionalTaxValueForFuelCanisterProduct() {
-        Product product = new FuelCanister("Benzyna", new BigDecimal("6.5"));
-        Assert.assertThat(new BigDecimal("6.5"), Matchers.comparesEqualTo(product.getPrice()));
-        Assert.assertThat(new BigDecimal(0), Matchers.comparesEqualTo(product.getTaxPercent()));
+    public void testProductTaxForFuelCanisterProductOnNormalDay() {
+        FuelCanister product = new FuelCanister("Benzyna", new BigDecimal("50"));
+        if (product.getCurrentDate().getMonthValue() == motherInLawMonth
+                && product.getCurrentDate().getDayOfMonth() == motherInLawDayOfMonth) {
+            product.setCurrentDate(product.getCurrentDate().getYear(), month, dayOfMonth);
+        }
+        // excise tax: 5.56 - normal day
+        Assert.assertThat(new BigDecimal("5.56"), Matchers.comparesEqualTo(product.getExciseTaxValue()));
+        // tax: 0.23 - normal day
+        Assert.assertThat(new BigDecimal("0.23"), Matchers.comparesEqualTo(product.getTaxPercent()));
     }
 
     @Test
-    public void testProductPriceAndPriceWithTaxForFuelCanisterProduct() {
-        Product product = new FuelCanister("Benzyna", new BigDecimal("6.5"));
-        Assert.assertThat(new BigDecimal("6.5"), Matchers.comparesEqualTo(product.getPrice()));
-        Assert.assertThat(new BigDecimal("6.5"), Matchers.comparesEqualTo(product.getPriceWithTax()));
+    public void testProductPriceAndPriceWithTaxForFuelCanisterProductOnNormalDay() {
+        FuelCanister product = new FuelCanister("Benzyna", new BigDecimal("50"));
+        if (product.getCurrentDate().getMonthValue() == motherInLawMonth
+                && product.getCurrentDate().getDayOfMonth() == motherInLawDayOfMonth) {
+            product.setCurrentDate(product.getCurrentDate().getYear(), month, dayOfMonth);
+        }
+        Assert.assertThat(new BigDecimal("50"), Matchers.comparesEqualTo(product.getPrice()));
+        Assert.assertThat(new BigDecimal("67.06"), Matchers.comparesEqualTo(product.getPriceWithTax()));
+    }
+
+    @Test
+    public void testProductTaxForFuelCanisterProductOnMotherInLawDay() {
+        FuelCanister product = new FuelCanister("Benzyna", new BigDecimal("50"));
+        product.setCurrentDate(product.getCurrentDate().getYear(), motherInLawMonth, motherInLawDayOfMonth);
+        // excise tax: 0 - Mother-in-law Day
+        Assert.assertThat(new BigDecimal("0"), Matchers.comparesEqualTo(product.getExciseTaxValue()));
+        // tax: 0 - Mother-in-law Day
+        Assert.assertThat(new BigDecimal("0"), Matchers.comparesEqualTo(product.getTaxPercent()));
+    }
+
+    @Test
+    public void testProductPriceAndPriceWithTaxForFuelCanisterProductOnMotherInLawDay() {
+        FuelCanister product = new FuelCanister("Benzyna", new BigDecimal("50"));
+        product.setCurrentDate(product.getCurrentDate().getYear(), motherInLawMonth, motherInLawDayOfMonth);
+        Assert.assertThat(new BigDecimal("50"), Matchers.comparesEqualTo(product.getPrice()));
+        Assert.assertThat(new BigDecimal("50"), Matchers.comparesEqualTo(product.getPriceWithTax()));
     }
 }
